@@ -16,26 +16,27 @@ import {
 } from "lucide-react";
 import { useLogiChain } from "@/context/LogiChainContext";
 import { formatUSD, formatTimeAgo } from "@/lib/utils";
+import { ContainerYardAsset, PortBerth, CustomsEntry } from "@/types/logichain";
 
 export default function TerminalYardPage() {
   const {
-    containerAssets,
-    portBerths,
-    customsQueue,
-    processCustomsClearance,
+    containers,
+    berths,
+    customs,
+    approveCustomsPIB,
     triggerConfetti,
   } = useLogiChain();
 
   const [selectedContainer, setSelectedContainer] = useState<string | null>(null);
 
-  const totalContainers = containerAssets.length;
-  const inStorageCount = containerAssets.filter((c) => c.yardLocation.startsWith("Y")).length;
-  const customsPendingCount = customsQueue.filter((c) => c.status === "PENDING_INSPECTION").length;
+  const totalContainers = containers.length;
+  const inStorageCount = containers.filter((c: ContainerYardAsset) => c.yardLocation.startsWith("Y")).length;
+  const customsPendingCount = customs.filter((c: CustomsEntry) => c.status === "PENDING_INSPECTION").length;
   const averageStorageDays =
-    containerAssets.reduce((acc, c) => acc + c.storageDays, 0) / totalContainers;
+    containers.reduce((acc: number, c: ContainerYardAsset) => acc + c.storageDays, 0) / (totalContainers || 1);
 
   const handleCustomsClear = (blNumber: string) => {
-    processCustomsClearance(blNumber);
+    approveCustomsPIB(blNumber);
     triggerConfetti();
   };
 
@@ -108,7 +109,7 @@ export default function TerminalYardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
-              {containerAssets.map((container) => (
+              {containers.map((container: ContainerYardAsset) => (
                 <tr
                   key={container.containerId}
                   onClick={() => setSelectedContainer(container.containerId)}
@@ -147,7 +148,7 @@ export default function TerminalYardPage() {
           <h2 className="font-bold text-sm text-slate-100">Port Berth Allocator</h2>
         </div>
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {portBerths.map((berth) => (
+          {berths.map((berth: PortBerth) => (
             <div
               key={berth.berthId}
               className={`rounded-lg border p-4 ${
@@ -218,32 +219,32 @@ export default function TerminalYardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
-              {customsQueue.map((customs) => (
-                <tr key={customs.blNumber} className="hover:bg-slate-800/30">
+              {customs.map((customsItem: CustomsEntry) => (
+                <tr key={customsItem.blNumber} className="hover:bg-slate-800/30">
                   <td className="px-4 py-3 font-mono text-sky-300 font-semibold">
-                    {customs.blNumber}
+                    {customsItem.blNumber}
                   </td>
-                  <td className="px-4 py-3 text-slate-300">{customs.importer}</td>
-                  <td className="px-4 py-3 text-slate-400 text-[10px]">{customs.commodity}</td>
+                  <td className="px-4 py-3 text-slate-300">{customsItem.importer}</td>
+                  <td className="px-4 py-3 text-slate-400 text-[10px]">{customsItem.commodity}</td>
                   <td className="px-4 py-3 text-amber-300 font-semibold">
-                    {formatUSD(customs.customsDuty)}
+                    {formatUSD(customsItem.customsDuty)}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-[9px] font-semibold uppercase ${
-                        customs.status === "CLEARED"
+                        customsItem.status === "CLEARED"
                           ? "bg-emerald-500/20 text-emerald-300"
                           : "bg-amber-500/20 text-amber-300"
                       }`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                      {customs.status.replace(/_/g, " ")}
+                      {customsItem.status.replace(/_/g, " ")}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    {customs.status === "PENDING_INSPECTION" ? (
+                    {customsItem.status === "PENDING_INSPECTION" ? (
                       <button
-                        onClick={() => handleCustomsClear(customs.blNumber)}
+                        onClick={() => handleCustomsClear(customsItem.blNumber)}
                         className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-semibold transition-all flex items-center space-x-1"
                       >
                         <CheckCircle2 className="w-3 h-3" />
