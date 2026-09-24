@@ -11,7 +11,7 @@ export interface CargoVessel {
   flag: string;
   teuCapacity: number;
   currentTeuLoad: number;
-  dwtTonnage: number; // Deadweight Tonnage
+  dwtTonnage: number;
   speedKnots: number;
   headingDegrees: number;
   originPort: string;
@@ -26,15 +26,15 @@ export interface CargoVessel {
 
 export interface ContainerYardAsset {
   id: string;
-  containerNumber: string; // e.g. MSKU-908124-7
+  containerNumber: string;
   isoCode: string;
   type: ContainerType;
-  ownerLine: string; // e.g. Maersk, Evergreen, CMA CGM, ONE
+  ownerLine: string;
   grossWeightKg: number;
   tareWeightKg: number;
-  bay: string; // e.g. Bay 04
-  row: number; // 1 - 6
-  tier: number; // 1 - 4
+  bay: string;
+  row: number;
+  tier: number;
   status: ContainerStatus;
   temperatureTargetCelsius?: number;
   actualTemperatureCelsius?: number;
@@ -58,10 +58,36 @@ export interface CustomsEntry {
   pibNumber: string; // Pemberitahuan Impor Barang
   importerName: string;
   hsCode: string;
+  goodsDescription: string;
   cifValueUsd: number;
   importDutyRatePercent: number;
   vatRatePercent: number;
+  incomeTaxRatePercent: number; // PPh 22
+  totalLevyIdr: number;
+  packagesCount: number;
+  grossWeightKg: number;
+  billOfLadingNumber: string;
   clearanceChannel: "GREEN_LINE" | "YELLOW_LINE" | "RED_LINE";
   status: "PENDING_TAX" | "INSPECTION" | "CLEARED";
   submissionDate: string;
+}
+
+export interface SensorTelemetryPoint {
+  time: string;
+  temp: number;
+  humidity: number;
+}
+
+export interface ColdChainSensorData {
+  containerId: string;
+  containerNumber: string;
+  productType: string;
+  targetTempCelsius: number;
+  currentTempCelsius: number;
+  minThresholdCelsius: number;
+  maxThresholdCelsius: number;
+  humidityPercent: number;
+  powerStatus: "SHORE_POWER" | "GENSET_ACTIVE" | "BATTERY_BACKUP";
+  compressorStatus: "NORMAL" | "DEFROSTING" | "EXCURSION_ALERT";
+  history: SensorTelemetryPoint[];
 }
